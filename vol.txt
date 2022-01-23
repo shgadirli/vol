@@ -1,0 +1,300 @@
+Memdump (RAM dump)  analysis with Volatility
+
+```powershell
+vol3 -f h:\memdump.mem imageinfo
+```
+
+```powershell
+vol2 -f h:\memdump.mem imageinfo
+```
+
+# Memgator
+
+Memgator Volatility evezine 
+
+Select mem file,  select imageinfo press X
+
+# Autorun
+
+Autorun - startda hansi elemetnler var, hansi elementler OS le birlikde acilir. 
+
+Hasher.exe  Folder and subfolderlerdeki butun fayllarin hashini cixarir. Sonra text fayla save edib daha sonra hashina gore fayllari axtarmaq olar.
+
+# Volatility
+
+```scss
+vol2.exe imageinfo -f memdump.mem
+```
+
+**Does it more precisely, OS info,**
+
+```scss
+vol3 -f memdump.mem kdbgscan
+```
+
+running the processes which are not terminated in this live image we captured
+
+```scss
+vol3 --profile=Win7SP1x64 pslist -f memdump.mem
+```
+
+redirect Output to text file
+
+```scss
+vol3 --profile=Win7SP1x64 pslist -f memdump.mem > memdumpslist.txt
+```
+
+Physical offset of programs running in the memory
+
+```scss
+vol3 --profile=Win7SP1x64 pslist -f memdump.mem > memdumpslist.txt -P
+```
+
+Dump **process itself and dump its memory space**
+
+```scss
+vol3 -f memdump.mem  --profile=Win7SP1x64 procdump --dump-dir .\  -p 2248 dllist
+```
+
+```scss
+vol3 -f memdump.mem  --profile=Win7SP1x64 procdump --dump-dir .\  -p 2248 dllist  > memdumpdllslist.txt
+```
+
+```scss
+vol2 -f memdump.mem  --profile=Win7SP1x64 -p 2248 --dump-dir ./
+```
+
+# MemDUMP analysis with Volatility
+
+```scss
+vol2 -f=h:\medump.mem imageinfo
+```
+
+```scss
+vol3 -f h:\medump.mem imageinfo
+```
+
+DLLDUMP
+
+BASE ADDRESS TO EXTRACT BINARY DATA
+
+Memgator livegator do the same (as volatility). GUI environment , easy to navigate.
+
+Memgator
+
+imageinfo
+dlldump
+memmap
+
+OpEning DLL files in binary view for analysis - PE EXplorer
+
+Muellim amma processdumpdan alinmis exe faylini acdi
+
+StudPE
+
+PE Detective - we can see signatures, bundle libraries, which functions is being imported, programming languages used.
+
+HxD -- to analyze exe file
+
+Resource hacker - to analyze exe file
+
+## Services running on these machines, open sockets, analyze network activities
+
+```scss
+vol3 -f memdump.mem  --profile=Win7SP1x64 svcscan > memdumpsoc.txt
+```
+
+```scss
+vol2 -f memdump.mem  --profile=Win7SP1x64 netscan > memdumpnetscan.txt
+```
+
+### Command to show entries
+
+```scss
+vol2 -f memdump.mem  --profile=Win7SP1x64 consoles > memdumpcmd.txt
+```
+
+```scss
+vol2 -f memdump.mem  --profile=Win7SP1x64 cmdscan > memdumpcmd.txt
+```
+
+# Virtualizing physical machine
+
+- mounting harddrive image
+- symantec ghost convertes mounted image to vmdk format
+- onu virtual machine-e atiriq
+
+AccessData FTK Imager
+ghost32.exe or UFS Explorer
+
+NirSoft, Winternals, Autopsy, Wireshark, Volatility, FTKImager
+
+search engine able to search using hashsum
+totalcommander,
+
+FCIV
+
+beloff
+
+# Creating image using FTKImager
+
+File-> Create DIsk Image->Image
+
+**Autoruns**- komp acilanda run olunan butun processleri gosterir
+
+RightClick -> Jump to Entry
+
+**Procmon** run olan proseslerin ne etdiyini gosterir. Ramda olan isleyen programlar
+
+c:\windows\system32
+
+# 11 December
+
+> **Dump analysis with Volatility**
+> 
+
+<aside>
+💡 Volatility ile hansi proqramlarin acildigina volatility **pslist** ile baxiriq
+
+</aside>
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 pslist > processlist.txt
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 pstree > processtree.txt
+
+<aside>
+💡 pslist pstree gorunen processleri gosterir -  isleyen aktiv olanlari
+
+</aside>
+
+<aside>
+💡 psxview ile ise hem isleyen hem silinen processleri
+
+</aside>
+
+```scss
+vol26 -f Memfile.mem --profile=Win7SP1x64 psxview > processpsxview.txt
+```
+
+cmss birinci baslayir parenti yoxdur.
+
+psxtree de qeribe adli .exe fayli s
+
+# Autospy
+
+autopys -> new case -> next -> next ->
+
+Autopsy davami 
+
+android , ios analyzer uncheck edirik sonra yene next
+
+DATA artifacts → installed programs
+
+<aside>
+💡 **FTK** ile disk image-ni her hansisa Drayva mount elemek -elebilki image real drive-a cevrilecek
+
+</aside>
+
+FTK imagerde image-i mountu etmek olur. explorerde gorunur.
+
+dsk.e01 sonluqlu fayli secdi ftk imagerde mount elemek ucun
+
+**mount type phy&log
+drive letter s
+mount method block device read only**
+
+next -> next zad
+
+winternals, zimmermantools -> bstrings
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 psxview > processpsxview.txt
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 netscan  > processnetscan.txt
+
+<aside>
+💡 **Processi (fayli) dump elemek**
+
+</aside>
+
+faylin (psxtree neticesinde subhelendiyin) dumpini cixartmaga (yeni fayli investigation komputerine atmaga) pidini gotururuk
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 - p 1420 procdump —dest-dir   Desktop
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 - p 1420 procdump —dump-dir=Desktop
+
+hasher var onunla onunla butun fayllarin hashini cixaririrq excel fayla export edeceyik
+
+Demeli procdumpla (volatility)  desktopa extract elediyimiz faylin md5 hashini propertiesden gotururuk, hemin programin hard diskde calisdigini tapaq. (Bu hashi Hasher vasitesile aldigimiz excel faylinda axtaririq)
+
+<aside>
+💡 Memdump
+
+</aside>
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 memdump  —dump-dir  > Desktop
+
+vol26 -f Memfile.mem --profile=Win7SP1x64 memdump -p 6488 —dump-dir=Desktop
+
+# Hasheri isletmek
+
+FTK ile mount elediyin disk imagenin mount olundugu yerden (Tutaqki S drayvina mount elemisen)  
+
+Hasherle butun hashlarini cixaririq.
+
+- [ ]  **ZimmermanTools-u endir bstringsi analiz ele**
+
+# 18 December - Last Lecture
+
+Haminda eyni Vmware guest olacaq. Icinde image ve dumplar olacaq. biz cixartmaga serf etmeyeceyik
+
+<aside>
+💡 Final exam -
+Meselen sual olacaqki bu IP-ye hansi proqram qosulub zad.
+
+Email unvanlarini cixart addressleri cixar bele suallar ola biler.
+
+</aside>
+
+Autopsy-da Report cixardirdiq, Prefetch fayllara (ilk defe run olunan exe-ler ucun meselen) Shellbacklara baxmaq ucun meselen.
+
+Volatility ile Recall eyni isleri gorur. Heresinin oz advantageleri var
+
+4n6 papkasinda Forenzik toollar var - Imtahandaki vmware.
+
+Autopsy-de Userlere baxmaq, Fayllara baxmaq, Prefetch, Shellback fayllar, LSA Dumpla userin passwordlarini gore bilerik
+
+Rekall programi da var. 
+
+Wiresharkla analysis olacaq. Packeti tutub stringlerine gore analysis edeceyik
+
+Smart sniff
+
+Autoruns - 
+
+Procmon 
+
+LSASecretdump Userin passwordunu gorururk. Ele LSASecretdump run edirik. Clear text password
+
+Hasherle butun hash-lerini cixaririq.
+
+Dumpda mimikatzdan istifade edirik passwordlar ucun
+
+Bstrings  icinde built in regex var. Github-da bax isletme qaydalarina
+
+Dumplar Z diskindedi
+
+### Bstrings
+
+bstrings.exe -f <mem file>
+
+Profile -i tapmaq ucun
+
+volatility -f z:\Dumpsy\memfile.mem imageinfo 
+
+BU bizim processlerimizdi
+
+volatility -f z:\Dumpsy\memfile.mem —profile=Win7SP1x64   psxview
+
+psxview-da pslist, psxlist hamisi table kimi gorunur 
+
+Olarin arasindan birini secib dump edek
