@@ -298,3 +298,238 @@ volatility -f z:\Dumpsy\memfile.mem —profile=Win7SP1x64   psxview
 psxview-da pslist, psxlist hamisi table kimi gorunur 
 
 Olarin arasindan birini secib dump edek
+
+
+
+
+
+
+
+
+
+
+OS Information
+
+./vol.py -f file.dmp windows.info.Info
+
+
+Hashes/Passwords
+
+VOL3
+
+./vol.py -f file.dmp windows.hashdump.Hashdump #Grab common windows hashes (SAM+SYSTEM)
+./vol.py -f file.dmp windows.cachedump.Cachedump #Grab domain cache hashes inside the registry
+./vol.py -f file.dmp windows.lsadump.Lsadump #Grab lsa secrets
+
+
+VOL2
+
+volatility --profile=Win7SP1x86_23418 hashdump -f file.dmp #Grab common windows hashes (SAM+SYSTEM)
+volatility --profile=Win7SP1x86_23418 cachedump -f file.dmp #Grab domain cache hashes inside the registry
+volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
+
+
+Memory Dump
+The memory dump of a process will extract everything of the current status of the process.
+The procdump module will only extract the code.
+
+volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
+
+
+Processes
+
+List processes
+
+Try to find suspicious processes (by name) or unexpected child processes (for example a cmd.exe as a child of iexplorer.exe).
+It could be interesting to compare the result of pslist with the one of psscan to identify hidden processes.
+
+VOL3
+
+python3 vol.py -f file.dmp windows.pstree.PsTree # Get processes tree (not hidden)
+python3 vol.py -f file.dmp windows.pslist.PsList # Get process list (EPROCESS)
+python3 vol.py -f file.dmp windows.psscan.PsScan # Get hidden process list(malware)
+
+
+VOL2
+
+volatility --profile=PROFILE pstree -f file.dmp # Get process tree (not hidden)
+volatility --profile=PROFILE pslist -f file.dmp # Get process list (EPROCESS)
+volatility --profile=PROFILE psscan -f file.dmp # Get hidden process list(malware)
+volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
+
+
+
+
+
+Dump proc
+
+VOL3
+
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid>   #Dump the .exe and dlls of the process in the current directory
+
+
+VOL2
+
+volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f file.dmp
+
+
+Command line
+
+Anything suspicious was executed?
+
+VOL3
+
+python3 vol.py -f file.dmp windows.cmdline.CmdLine #Display process command-line arguments
+
+VOL2
+
+volatility --profile=PROFILE cmdline -f file.dmp #Display process command-line arguments
+volatility --profile=PROFILE consoles -f file.dmp #command history by scanning for _CONSOLE_INFORMATION
+
+
+Commands entered into cmd.exe are processed by conhost.exe (csrss.exe prior to Windows 7). So even if an attacker managed to kill the cmd.exe prior to us obtaining a memory dump, there is still a good chance of recovering history of the command line session from conhost.exe’s memory. If you find something weird (using the consoles modules), try to dump the memory of the conhost.exe associated process and search for strings inside it to extract the command lines.
+
+
+Environment
+
+VOL3
+
+python3 vol.py -f file.dmp windows.envars.Envars [--pid <pid>] #Display process environment variables
+
+
+VOL2
+
+volatility --profile=PROFILE envars -f file.dmp [--pid <pid>] #Display process environment variables
+
+volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of process. runlevel var means the runlevel where the proc is initated 
+
+Token privileges
+
+Check for privileges tokens in unexpected services.
+It could be interesting to list the processes using some privileged token.
+
+VOL3
+
+#Get enabled privileges of some processes
+python3 vol.py -f file.dmp windows.privileges.Privs [--pid <pid>]
+#Get all processes with interesting privileges
+python3 vol.py -f file.dmp windows.privileges.Privs | grep "SeImpersonatePrivilege\|SeAssignPrimaryPrivilege\|SeTcbPrivilege\|SeBackupPrivilege\|SeRestorePrivilege\|SeCreateTokenPrivilege\|SeLoadDriverPrivilege\|SeTakeOwnershipPrivilege\|SeDebugPrivilege"
+
+VOL2
+
+#Get enabled privileges of some processes
+volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
+#Get all processes with interesting privileges
+volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePrivilege\|SeAssignPrimaryPrivilege\|SeTcbPrivilege\|SeBackupPrivilege\|SeRestorePrivilege\|SeCreateTokenPrivilege\|SeLoadDriverPrivilege\|SeTakeOwnershipPrivilege\|SeDebugPrivilege"
+
+
+SIDs
+Check each SSID owned by a process.
+It could be interesting to list the processes using a privileges SID (and the processes using some service SID)
+
+VOL3
+
+./vol.py -f file.dmp windows.getsids.GetSIDs [--pid <pid>] #Get SIDs of processes
+./vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
+
+VOL2 
+
+volatility --profile=Win7SP1x86_23418 getsids -f file.dmp #Get the SID owned by each process
+volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of each service
+
+
+DLLs
+
+VOL3
+./vol.py -f file.dmp windows.dlllist.DllList [--pid <pid>] #List dlls used by each
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory process
+
+VOL2
+volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f file.dmp #Get dlls of a proc
+volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dmp #Dump dlls of a proc
+
+
+Handles
+Useful to know to which other files, keys, threads, processes... a process has a handle for (has opened)
+
+VOL3
+vol.py -f file.dmp windows.handles.Handles [--pid <pid>]
+
+VOL2
+volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
+
+Services
+VOL3
+./vol.py -f file.dmp windows.svcscan.SvcScan #List services
+./vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
+
+
+VOL2
+#Get services and binary path
+volatility --profile=Win7SP1x86_23418 svcscan -f file.dmp
+#Get name of the services and SID (slow)
+volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
+
+Network
+
+VOL3
+./vol.py -f file.dmp windows.netscan.NetScan
+#For network info of linux use volatility2
+
+volatility --profile=Win7SP1x86_23418 netscan -f file.dmp
+volatility --profile=Win7SP1x86_23418 connections -f file.dmp#XP and 2003 only
+volatility --profile=Win7SP1x86_23418 connscan -f file.dmp#TCP connections 
+volatility --profile=Win7SP1x86_23418 sockscan -f file.dmp#Open sockets
+volatility --profile=Win7SP1x86_23418 sockets -f file.dmp#Scanner for tcp socket objects
+
+
+Scan/dump
+
+VOL3
+
+./vol.py -f file.dmp windows.filescan.FileScan #Scan for files inside the dump
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --physaddr <0xAAAAA> #Offset from previous command
+
+VOL2
+
+volatility --profile=Win7SP1x86_23418 filescan -f file.dmp #Scan for files inside the dump
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -f file.dmp #Dump all files
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -Q 0x000000007dcaa620 -f file.dmp
+
+
+Master File Table
+
+volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
+
+
+
+Malware
+
+./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
+#Malfind will search for suspicious structures related to malware
+./vol.py -f file.dmp windows.driverirp.DriverIrp #Driver IRP hook detection
+./vol.py -f file.dmp windows.ssdt.SSDT #Check system call address from unexpected addresses
+
+
+
+VOL2
+
+volatility --profile=Win7SP1x86_23418 -f file.dmp malfind [-D /tmp] #Find hidden and injected code [dump each suspicious section]
+volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in process and kernel memory
+volatility --profile=Win7SP1x86_23418 -f file.dmp driverirp #Driver IRP hook detection
+volatility --profile=Win7SP1x86_23418 -f file.dmp ssdt #Check system call address from unexpected addresses
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
