@@ -367,6 +367,9 @@ VOL3
 
 ./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid>   #Dump the .exe and dlls of the process in the current directory
 
+vol.py -f mydump.vmem -o /path/to/output/dir windows.memmap.Memmap --pid 1233 --dump
+
+
 
 VOL2
 
